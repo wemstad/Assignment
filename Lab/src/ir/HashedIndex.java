@@ -5,60 +5,60 @@
  *   First version:  Johan Boye, 2010
  *   Second version: Johan Boye, 2012
  *   Additions: Hedvig Kjellström, 2012
- */  
-
+ *   Finalized by: Christian Wemstad, 2013
+ */
 
 package ir;
 
 import java.util.LinkedList;
 import java.util.HashMap;
 
-
 /**
- *   Implements an inverted index as a Hashtable from words to PostingsLists.
+ * Implements an inverted index as a Hashtable from words to PostingsLists.
  */
 public class HashedIndex implements Index {
 
-    /** The index as a hashtable. */
-    private HashMap<String,PostingsList> index = new HashMap<String,PostingsList>();
+	/** The index as a hashtable. */
+	private HashMap<String, PostingsList> index = new HashMap<String, PostingsList>();
 
+	/**
+	 * Inserts this token in the index.
+	 */
+	public void insert(String token, int docID, int offset) {
+		PostingsList list = index.get(token);
+		if (list == null) {
+			list = new PostingsList();
+			index.put(token, list);
+		}
+		list.add(docID);
+	}
 
-    /**
-     *  Inserts this token in the index.
-     */
-    public void insert( String token, int docID, int offset ) {
-	//
-	//  YOUR CODE HERE
-	//
-    }
+	/**
+	 * Returns the postings for a specific term, or null if the term is not in
+	 * the index.
+	 */
+	public PostingsList getPostings(String token) {
+		PostingsList list = index.get(token);
+		if(list == null || list.size() == 0)
+			return null;
+		return list;
+	}
 
+	/**
+	 * Searches the index for postings matching the query.
+	 */
+	public PostingsList search(Query query, int queryType, int rankingType) {
+		PostingsList all = getPostings(query.terms.getFirst());
+		for(int i = 1; i < query.terms.size(); i++ ) {
+			PostingsList currentList = getPostings(query.terms.get(i));
+			all.removeAllNotIn(currentList);
+		}
+		return all;
+	}
 
-    /**
-     *  Returns the postings for a specific term, or null
-     *  if the term is not in the index.
-     */
-    public PostingsList getPostings( String token ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
-    }
-
-
-    /**
-     *  Searches the index for postings matching the query.
-     */
-    public PostingsList search( Query query, int queryType, int rankingType ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
-    }
-
-
-    /**
-     *  No need for cleanup in a HashedIndex.
-     */
-    public void cleanup() {
-    }
+	/**
+	 * No need for cleanup in a HashedIndex.
+	 */
+	public void cleanup() {
+	}
 }
