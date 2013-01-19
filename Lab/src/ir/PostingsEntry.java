@@ -10,16 +10,26 @@
 package ir;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 
 	private static final long serialVersionUID = 8415974529423644037L;
 	public int docID;
 	public double score;
+	public ArrayList<Integer> offsets;
 
-	public PostingsEntry(int docID, double score) {
+	public PostingsEntry(int docID, int offset, double score) {
 		this.docID = docID;
 		this.score = score;
+		offsets = new ArrayList<Integer>();
+		offsets.add(offset);
+	}
+	
+	public PostingsEntry(int docID, ArrayList<Integer> offsets, double score) {
+		this.docID = docID;
+		this.score = score;
+		this.offsets = offsets;
 	}
 
 	/**
@@ -44,6 +54,17 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 	public int hashCode() {
 		System.err.println("ERROR: USING hashcode()!!!!!!!!!!");
 		return 0;
+	}
+
+	public void addOffset(int offset) {
+		offsets.add(offset);
+	}
+	
+	public PostingsEntry clone()
+	{	
+		@SuppressWarnings("unchecked")
+		ArrayList<Integer> clone = (ArrayList<Integer>) offsets.clone();
+		return new PostingsEntry(docID, clone, score);
 	}
 
 }

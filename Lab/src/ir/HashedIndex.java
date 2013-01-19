@@ -10,7 +10,6 @@
 
 package ir;
 
-import java.util.LinkedList;
 import java.util.HashMap;
 
 /**
@@ -30,7 +29,7 @@ public class HashedIndex implements Index {
 			list = new PostingsList();
 			index.put(token, list);
 		}
-		list.add(docID);
+		list.add(docID, offset);
 	}
 
 	/**
@@ -39,7 +38,7 @@ public class HashedIndex implements Index {
 	 */
 	public PostingsList getPostings(String token) {
 		PostingsList list = index.get(token);
-		if(list == null || list.size() == 0)
+		if (list == null || list.size() == 0)
 			return null;
 		return list;
 	}
@@ -48,12 +47,25 @@ public class HashedIndex implements Index {
 	 * Searches the index for postings matching the query.
 	 */
 	public PostingsList search(Query query, int queryType, int rankingType) {
-		PostingsList all = getPostings(query.terms.getFirst());
-		for(int i = 1; i < query.terms.size(); i++ ) {
-			PostingsList currentList = getPostings(query.terms.get(i));
-			all.removeAllNotIn(currentList);
+		
+		PostingsList all = getPostings(query.terms.getFirst()).clone();
+		
+		if (queryType == Index.INTERSECTION_QUERY) {
+			for (int i = 1; i < query.terms.size(); i++) {
+				PostingsList currentList = getPostings(query.terms.get(i));
+				all.removeAllNotIn(currentList);
+			}
+			return all;
 		}
-		return all;
+		else if (queryType == Index.PHRASE_QUERY) {
+			for (int i = 1; i < query.terms.size(); i++) {
+				PostingsList currentList = getPostings(query.terms.get(i));
+				all.removeAllNotFollowedBy(currentList, i);
+			}
+			return all;
+		}
+		return 
+			null;
 	}
 
 	/**
