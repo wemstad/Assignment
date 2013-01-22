@@ -56,9 +56,20 @@ public class PostingsList implements Serializable {
 	/** Add docID to the list */
 	public void add(int docID, int offset) {
 		// TODO score will not be 0;
-		PostingsEntry pe = getByDocID(docID);
+		PostingsEntry pe = null;
+		int i = 0;
+		for (PostingsEntry p : list) {
+			if (p.docID == docID) {
+				pe = p;
+				break;
+			} else if (p.docID < docID)
+				i++;
+			else
+				break;
+
+		}
 		if (pe == null)
-			list.add(new PostingsEntry(docID, offset, 0));
+			list.add(i, new PostingsEntry(docID, offset, 0));
 		else
 			pe.addOffset(offset);
 
@@ -72,13 +83,22 @@ public class PostingsList implements Serializable {
 	}
 
 	public void removeAllNotIn(PostingsList otherList) {
-		// TODO Naive implementation: REFACTOR
-		for (int i = 0; i < size();) {
-			if (!otherList.contains(get(i)))
-				remove(i);
-			else
+		int i = 0;
+		int j = 0;
+		while (i < size() && j < otherList.size()) {
+			int thisDoc = get(i).docID;
+			int otherDoc = otherList.get(j).docID;
+			if (thisDoc == otherDoc) {
 				i++;
+				j++;
+			} else if (thisDoc > otherDoc) {
+				j++;
+			} else if (thisDoc < otherDoc) {
+				remove(i);
+			}
 		}
+		while (i < size())
+			remove(i);
 	}
 
 	public void removeAllNotFollowedBy(PostingsList otherList, int differOffset) {
@@ -90,7 +110,7 @@ public class PostingsList implements Serializable {
 			else {
 				PostingsEntry otherEntry = otherList.getByDocID(toCheck.docID)
 						.clone();
-				
+
 				for (int j = 0; j < toCheck.offsets.size();) {
 					int offset = toCheck.offsets.get(j);
 					if (!otherEntry.offsets.contains(offset + differOffset))

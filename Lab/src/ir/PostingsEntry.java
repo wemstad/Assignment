@@ -25,7 +25,7 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 		offsets = new ArrayList<Integer>();
 		offsets.add(offset);
 	}
-	
+
 	public PostingsEntry(int docID, ArrayList<Integer> offsets, double score) {
 		this.docID = docID;
 		this.score = score;
@@ -57,11 +57,19 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 	}
 
 	public void addOffset(int offset) {
-		offsets.add(offset);
+		int index = 0;
+		for (Integer i : offsets) {
+			if (offset == i)
+				return;
+			else if (offset < i)
+				index++;
+			else
+				break;
+		}
+		offsets.add(index, offset);
 	}
-	
-	public PostingsEntry clone()
-	{	
+
+	public PostingsEntry clone() {
 		@SuppressWarnings("unchecked")
 		ArrayList<Integer> clone = (ArrayList<Integer>) offsets.clone();
 		return new PostingsEntry(docID, clone, score);
