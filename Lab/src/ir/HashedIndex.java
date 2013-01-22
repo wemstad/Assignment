@@ -10,6 +10,8 @@
 
 package ir;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -48,16 +50,27 @@ public class HashedIndex implements Index {
 	 */
 	public PostingsList search(Query query, int queryType, int rankingType) {
 		
-		PostingsList all = getPostings(query.terms.getFirst()).clone();
 		
 		if (queryType == Index.INTERSECTION_QUERY) {
-			for (int i = 1; i < query.terms.size(); i++) {
-				PostingsList currentList = getPostings(query.terms.get(i));
-				all.removeAllNotIn(currentList);
+			ArrayList<PostingsList> lists = new ArrayList<PostingsList>();
+			for (int i = 0; i < query.terms.size(); i++) {
+				PostingsList pl = getPostings(query.terms.get(i));
+				if(pl == null)
+					return new PostingsList();
+				lists.add(pl);
+			}
+			
+			Collections.sort(lists);
+			
+			PostingsList all = lists.get(0);
+			lists.remove(0);
+			for(PostingsList pl : lists) {
+				all = PostingsList.removeAllNotIn(all, pl);
 			}
 			return all;
 		}
 		else if (queryType == Index.PHRASE_QUERY) {
+			PostingsList all = getPostings(query.terms.getFirst()).clone();
 			for (int i = 1; i < query.terms.size(); i++) {
 				PostingsList currentList = getPostings(query.terms.get(i));
 				all.removeAllNotFollowedBy(currentList, i);

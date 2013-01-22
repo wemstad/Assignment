@@ -9,13 +9,13 @@
 
 package ir;
 
-import java.util.LinkedList;
 import java.io.Serializable;
+import java.util.LinkedList;
 
 /**
  * A list of postings for a given word.
  */
-public class PostingsList implements Serializable {
+public class PostingsList implements Serializable, Comparable<PostingsList> {
 
 	private static final long serialVersionUID = 2230139515028354609L;
 
@@ -82,23 +82,24 @@ public class PostingsList implements Serializable {
 		return null;
 	}
 
-	public void removeAllNotIn(PostingsList otherList) {
+	public static PostingsList removeAllNotIn(PostingsList firstList, PostingsList secondList) {
 		int i = 0;
 		int j = 0;
-		while (i < size() && j < otherList.size()) {
-			int thisDoc = get(i).docID;
-			int otherDoc = otherList.get(j).docID;
-			if (thisDoc == otherDoc) {
+		PostingsList returnList = new PostingsList();
+		while (i < secondList.size() && j < firstList.size()) {
+			int secondDoc = secondList.get(i).docID;
+			int firstDoc = firstList.get(j).docID;
+			if (secondDoc == firstDoc) {
+				returnList.add(firstDoc, 0); //Should merge offsets
 				i++;
 				j++;
-			} else if (thisDoc > otherDoc) {
+			} else if (secondDoc > firstDoc) {
 				j++;
-			} else if (thisDoc < otherDoc) {
-				remove(i);
+			} else if (secondDoc < firstDoc) {
+				i++;
 			}
 		}
-		while (i < size())
-			remove(i);
+		return returnList;
 	}
 
 	public void removeAllNotFollowedBy(PostingsList otherList, int differOffset) {
@@ -129,6 +130,11 @@ public class PostingsList implements Serializable {
 	@SuppressWarnings("unchecked")
 	public PostingsList clone() {
 		return new PostingsList((LinkedList<PostingsEntry>) list.clone());
+	}
+
+	@Override
+	public int compareTo(PostingsList o) {
+		return (int) Math.signum(size() - o.size());
 	}
 
 }

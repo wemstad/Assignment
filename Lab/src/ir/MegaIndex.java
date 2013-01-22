@@ -174,7 +174,7 @@ public class MegaIndex implements Index {
 		if (queryType == Index.INTERSECTION_QUERY) {
 			for (int i = 1; i < query.terms.size(); i++) {
 				PostingsList currentList = getPostings(query.terms.get(i));
-				all.removeAllNotIn(currentList);
+				//removeAllNotIn(currentList);
 			}
 			return all;
 		} else if (queryType == Index.PHRASE_QUERY) {
