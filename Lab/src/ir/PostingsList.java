@@ -18,18 +18,18 @@ import java.io.Serializable;
 public class PostingsList implements Serializable {
 
 	private static final long serialVersionUID = 2230139515028354609L;
-	
+
 	/** The postings list as a linked list. */
 	private LinkedList<PostingsEntry> list = new LinkedList<PostingsEntry>();
 
 	public PostingsList() {
-		
+
 	}
-	
+
 	public PostingsList(LinkedList<PostingsEntry> list) {
 		this.list = list;
 	}
-	
+
 	/** Number of postings in this list */
 	public int size() {
 		return list.size();
@@ -55,18 +55,18 @@ public class PostingsList implements Serializable {
 
 	/** Add docID to the list */
 	public void add(int docID, int offset) {
-    	// TODO score will not be 0;
-    	PostingsEntry pe =  getByDocID(docID);
-    	if(pe == null)
-    		list.add(new PostingsEntry(docID, offset, 0));
-    	else
-    		pe.addOffset(offset);
-    	
-    }
+		// TODO score will not be 0;
+		PostingsEntry pe = getByDocID(docID);
+		if (pe == null)
+			list.add(new PostingsEntry(docID, offset, 0));
+		else
+			pe.addOffset(offset);
+
+	}
 
 	public PostingsEntry getByDocID(int docID) {
-		for(PostingsEntry p : list)
-			if(p.docID == docID)
+		for (PostingsEntry p : list)
+			if (p.docID == docID)
 				return p;
 		return null;
 	}
@@ -88,28 +88,27 @@ public class PostingsList implements Serializable {
 			if (!otherList.contains(toCheck))
 				remove(i);
 			else {
-				PostingsEntry otherEntry = otherList.getByDocID(toCheck.docID).clone();
+				PostingsEntry otherEntry = otherList.getByDocID(toCheck.docID)
+						.clone();
 				
-				for(int j = 0; j < toCheck.offsets.size();) {
+				for (int j = 0; j < toCheck.offsets.size();) {
 					int offset = toCheck.offsets.get(j);
-					if(!otherEntry.offsets.contains(offset + differOffset))
+					if (!otherEntry.offsets.contains(offset + differOffset))
 						toCheck.offsets.remove((Integer) offset);
 					else
 						j++;
 				}
-				if(toCheck.offsets.isEmpty())
+				if (toCheck.offsets.isEmpty())
 					remove(i);
 				else
 					i++;
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public PostingsList clone() {
 		return new PostingsList((LinkedList<PostingsEntry>) list.clone());
 	}
-	
-	
 
 }
