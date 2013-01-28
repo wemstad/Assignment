@@ -10,6 +10,8 @@
 package ir;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 
 /**
@@ -20,15 +22,15 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 	private static final long serialVersionUID = 2230139515028354609L;
 
 	/** The postings list as a linked list. */
-	private LinkedList<PostingsEntry> list = new LinkedList<PostingsEntry>();
+	public LinkedList<PostingsEntry> list = new LinkedList<PostingsEntry>();
 
 	public PostingsList() {
 
 	}
 
-	public PostingsList(LinkedList<PostingsEntry> list) {
-		this.list = list;
-	}
+	/*
+	 * public PostingsList(LinkedList<PostingsEntry> list) { this.list = list; }
+	 */
 
 	/** Number of postings in this list */
 	public int size() {
@@ -55,7 +57,7 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 
 	/** Add docID to the list */
 	public void add(int docID, int offset) {
-		// TODO score will not be 0;
+		// TODO score should not be 0;
 		PostingsEntry pe = null;
 		int i = 0;
 		for (PostingsEntry p : list) {
@@ -82,7 +84,8 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 		return null;
 	}
 
-	public static PostingsList removeAllNotIn(PostingsList firstList, PostingsList secondList) {
+	public static PostingsList removeAllNotIn(PostingsList firstList,
+			PostingsList secondList) {
 		int i = 0;
 		int j = 0;
 		PostingsList returnList = new PostingsList();
@@ -90,7 +93,7 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 			int secondDoc = secondList.get(i).docID;
 			int firstDoc = firstList.get(j).docID;
 			if (secondDoc == firstDoc) {
-				returnList.add(firstDoc, 0); //Should merge offsets
+				returnList.add(firstDoc, 0); // Should merge offsets
 				i++;
 				j++;
 			} else if (secondDoc > firstDoc) {
@@ -102,39 +105,108 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 		return returnList;
 	}
 
-	public void removeAllNotFollowedBy(PostingsList otherList, int differOffset) {
-		// TODO Naive implementation: REFACTOR
-		for (int i = 0; i < size();) {
-			PostingsEntry toCheck = get(i);
-			if (!otherList.contains(toCheck))
-				remove(i);
-			else {
-				PostingsEntry otherEntry = otherList.getByDocID(toCheck.docID)
-						.clone();
-
-				for (int j = 0; j < toCheck.offsets.size();) {
-					int offset = toCheck.offsets.get(j);
-					if (!otherEntry.offsets.contains(offset + differOffset))
-						toCheck.offsets.remove((Integer) offset);
-					else
-						j++;
+	public static PostingsList removeAllNotFollowedBy(PostingsList firstList,
+			PostingsList secondList) {
+		int i = 0;
+		int j = 0;
+		PostingsList returnList = new PostingsList();
+		while (i < secondList.size() && j < firstList.size()) {
+			int firstDoc = firstList.get(j).docID;
+			int secondDoc = secondList.get(i).docID;
+			if (secondDoc == firstDoc) {
+				PostingsEntry first = firstList.get(j);
+				PostingsEntry second = secondList.get(i);
+				int ii = 0;
+				int jj = 0;
+				while (ii < second.offsets.size() && jj < first.offsets.size()) {
+					int firstOff = first.offsets.get(jj);
+					int secondOff = second.offsets.get(ii);
+					if (firstOff == (secondOff - 1)) {
+						returnList.add(firstDoc, secondOff);
+						ii++;
+						jj++;
+					} else if (secondOff > firstOff) // Only one separated is
+														// captured above
+					{
+						jj++;
+					} else
+						ii++;
 				}
-				if (toCheck.offsets.isEmpty())
-					remove(i);
-				else
-					i++;
+				i++;
+				j++;
+			} else if (secondDoc > firstDoc) {
+				j++;
+			} else if (secondDoc < firstDoc) {
+				i++;
 			}
 		}
+		return returnList;
 	}
 
-	@SuppressWarnings("unchecked")
-	public PostingsList clone() {
-		return new PostingsList((LinkedList<PostingsEntry>) list.clone());
+	public static PostingsList phrase_query(PostingsList a, PostingsList b) {
+		PostingsList result = new PostingsList();
+		int i = 0;
+		int j = 0;
+
+		while (i < a.size() && j < b.size()) {
+			int ai = a.get(i).docID;
+			int bj = b.get(j).docID;
+			if (ai == bj) {
+				ArrayList<Integer> offsets = PostingsEntry.is_followed_by(
+						a.get(i), b.get(j));
+				for (int off : offsets) {
+					result.add(ai, off);
+				}
+				i++;
+				j++;
+			} else if (ai < bj) {
+				i++;
+			} else {
+				j++;
+			}
+		}
+		return result;
 	}
 
+	/*
+	 * @SuppressWarnings("unchecked") public PostingsList clone() { return new
+	 * PostingsList((LinkedList<PostingsEntry>) list.clone()); }
+	 */
 	@Override
 	public int compareTo(PostingsList o) {
 		return (int) Math.signum(size() - o.size());
+	}
+
+	@Override
+	public String toString() {
+		return list.toString();
+	}
+
+	public void merge(PostingsList otherList) {
+		// Collections.sort(thisList.list);
+		// Collections.sort(otherList.list);
+		int i = 0;
+		int j = 0;
+		// System.out.println("Lets i " + i);
+		while (i < size() && j < otherList.size()) {
+			// System.out.println("Lets  " + j);
+			if (otherList.get(j).docID < get(i).docID) {
+				list.add(i, otherList.get(j));
+				i++;
+				j++;
+			} else if (otherList.get(j).docID > get(i).docID) {
+				i++;
+			} else {
+				i++;
+				j++;
+			}
+		}
+		while (j < otherList.size()) {
+			list.add(i, otherList.get(j));
+			j++;
+			i++;
+		}
+
 	}
 
 }

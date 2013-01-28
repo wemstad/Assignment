@@ -49,8 +49,6 @@ public class HashedIndex implements Index {
 	 * Searches the index for postings matching the query.
 	 */
 	public PostingsList search(Query query, int queryType, int rankingType) {
-		
-		
 		if (queryType == Index.INTERSECTION_QUERY) {
 			ArrayList<PostingsList> lists = new ArrayList<PostingsList>();
 			for (int i = 0; i < query.terms.size(); i++) {
@@ -70,10 +68,14 @@ public class HashedIndex implements Index {
 			return all;
 		}
 		else if (queryType == Index.PHRASE_QUERY) {
-			PostingsList all = getPostings(query.terms.getFirst()).clone();
+			PostingsList all = getPostings(query.terms.getFirst());
+			if(all == null)
+				return null;
 			for (int i = 1; i < query.terms.size(); i++) {
 				PostingsList currentList = getPostings(query.terms.get(i));
-				all.removeAllNotFollowedBy(currentList, i);
+				if(currentList == null)
+					return null;
+				all = PostingsList.removeAllNotFollowedBy(all, currentList);
 			}
 			return all;
 		}

@@ -9,13 +9,16 @@
 
 package ir;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
+
+import com.larvalabs.megamap.MegaMap;
 import com.larvalabs.megamap.MegaMapException;
 import com.larvalabs.megamap.MegaMapManager;
-import com.larvalabs.megamap.MegaMap;
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.HashMap;
-import java.util.Set;
 
 public class MegaIndex implements Index {
 
@@ -112,7 +115,7 @@ public class MegaIndex implements Index {
 	/**
 	 * Returns the dictionary (the set of terms in the index) as a HashSet.
 	 */
-	public Set getDictionary() {
+	public Set<String> getDictionary() {
 		return index.getKeys();
 	}
 
@@ -123,9 +126,25 @@ public class MegaIndex implements Index {
 		try {
 			MegaMap res = manager.createMegaMap(generateFilename(), path, true,
 					false);
-			//
-			// YOUR CODE HERE
-			//
+			for (MegaMap index : indexes) {
+				for (String s : (Set<String>) index.getKeys()) {
+					if (s.equals("..docIDs"))
+						continue;
+					if (res.hasKey(s)) {
+						try {
+							PostingsList pl = (PostingsList) res.get(s);
+							if (pl != null && index.get(s) != null)
+								pl.merge((PostingsList) index.get(s));
+							else if (index.get(s) != null) {
+								pl = (PostingsList) index.get(s);
+							}
+						} catch (ClassCastException e) {
+							System.out.println("error");
+						}
+					} else if (s != null && index.get(s) != null)
+						res.put(s, (PostingsList) index.get(s));
+				}
+			}
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -141,7 +160,6 @@ public class MegaIndex implements Index {
 		try {
 			list = (PostingsList) index.get(token);
 		} catch (MegaMapException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -168,24 +186,36 @@ public class MegaIndex implements Index {
 	 * Searches the index for postings matching the query.
 	 */
 	public PostingsList search(Query query, int queryType, int rankingType) {
-
-		PostingsList all = getPostings(query.terms.getFirst()).clone();
-
 		if (queryType == Index.INTERSECTION_QUERY) {
-			for (int i = 1; i < query.terms.size(); i++) {
-				PostingsList currentList = getPostings(query.terms.get(i));
-				//removeAllNotIn(currentList);
+			ArrayList<PostingsList> lists = new ArrayList<PostingsList>();
+			for (int i = 0; i < query.terms.size(); i++) {
+				PostingsList pl = getPostings(query.terms.get(i));
+				if (pl == null)
+					return new PostingsList();
+				lists.add(pl);
+			}
+
+			Collections.sort(lists);
+
+			PostingsList all = lists.get(0);
+			lists.remove(0);
+			for (PostingsList pl : lists) {
+				all = PostingsList.removeAllNotIn(all, pl);
 			}
 			return all;
 		} else if (queryType == Index.PHRASE_QUERY) {
+			PostingsList all = getPostings(query.terms.getFirst());
+			if (all == null)
+				return null;
 			for (int i = 1; i < query.terms.size(); i++) {
 				PostingsList currentList = getPostings(query.terms.get(i));
-				all.removeAllNotFollowedBy(currentList, i);
+				if (currentList == null)
+					return null;
+				all = PostingsList.removeAllNotFollowedBy(all, currentList);
 			}
 			return all;
 		}
 		return null;
-
 	}
 
 }
