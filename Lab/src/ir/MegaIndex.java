@@ -128,8 +128,18 @@ public class MegaIndex implements Index {
 					false);
 			for (MegaMap index : indexes) {
 				for (String s : (Set<String>) index.getKeys()) {
-					if (s.equals("..docIDs"))
+					if (s.equals("..docIDs")) {
+						HashMap<String, String> m = (HashMap<String, String>) index
+								.get("..docIDs");
+						if (m == null) {
+							System.err
+									.println("Couldn't retrieve the associations between docIDs and document names");
+						} else {
+							docIDs.putAll(m);
+						}
 						continue;
+					}
+				
 					if (res.hasKey(s)) {
 						try {
 							PostingsList pl = (PostingsList) res.get(s);
@@ -142,7 +152,7 @@ public class MegaIndex implements Index {
 							System.out.println("error");
 						}
 					} else if (s != null && index.get(s) != null)
-						res.put(s, (PostingsList) index.get(s));
+						res.put(s, (PostingsList)((PostingsList) index.get(s)).clone());
 				}
 			}
 			return res;

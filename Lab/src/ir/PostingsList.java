@@ -104,7 +104,12 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 		}
 		return returnList;
 	}
-
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		PostingsList returnList = new PostingsList();
+		returnList.list = (LinkedList<PostingsEntry>) list.clone();
+		return returnList;
+	}
 	public static PostingsList removeAllNotFollowedBy(PostingsList firstList,
 			PostingsList secondList) {
 		int i = 0;
