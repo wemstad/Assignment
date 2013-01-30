@@ -67,29 +67,6 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 		ArrayList<Integer> clone = (ArrayList<Integer>) offsets.clone();
 		return new PostingsEntry(docID, clone, score);
 	}
-
-	public static ArrayList<Integer> is_followed_by(PostingsEntry a,
-			PostingsEntry b) {
-		ArrayList<Integer> result = new ArrayList<Integer>();
-
-		int i = 0;
-		int j = 0;
-
-		while (i < a.offsets.size() && j < b.offsets.size()) {
-			int ai = a.offsets.get(i);
-			int bj = b.offsets.get(j);
-			if ((bj - ai) == 1) {
-				result.add(bj);
-				i++;
-				j++;
-			} else if (ai >= bj) {
-				j++;
-			} else {
-				i++;
-			}
-		}
-		return result;
-	}
 	
 	@Override
 	public String toString() {

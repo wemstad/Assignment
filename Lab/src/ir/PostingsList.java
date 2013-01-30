@@ -104,6 +104,7 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 		}
 		return returnList;
 	}
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		PostingsList returnList = new PostingsList();
@@ -148,31 +149,6 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 		return returnList;
 	}
 
-	public static PostingsList phrase_query(PostingsList a, PostingsList b) {
-		PostingsList result = new PostingsList();
-		int i = 0;
-		int j = 0;
-
-		while (i < a.size() && j < b.size()) {
-			int ai = a.get(i).docID;
-			int bj = b.get(j).docID;
-			if (ai == bj) {
-				ArrayList<Integer> offsets = PostingsEntry.is_followed_by(
-						a.get(i), b.get(j));
-				for (int off : offsets) {
-					result.add(ai, off);
-				}
-				i++;
-				j++;
-			} else if (ai < bj) {
-				i++;
-			} else {
-				j++;
-			}
-		}
-		return result;
-	}
-
 	/*
 	 * @SuppressWarnings("unchecked") public PostingsList clone() { return new
 	 * PostingsList((LinkedList<PostingsEntry>) list.clone()); }
@@ -188,20 +164,16 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 	}
 
 	public void merge(PostingsList otherList) {
-		// Collections.sort(thisList.list);
-		// Collections.sort(otherList.list);
 		int i = 0;
 		int j = 0;
-		// System.out.println("Lets i " + i);
 		while (i < size() && j < otherList.size()) {
-			// System.out.println("Lets  " + j);
 			if (otherList.get(j).docID < get(i).docID) {
 				list.add(i, otherList.get(j));
 				i++;
 				j++;
 			} else if (otherList.get(j).docID > get(i).docID) {
 				i++;
-			} else {
+			} else { //If the same document, drop and continue.
 				i++;
 				j++;
 			}

@@ -127,7 +127,11 @@ public class MegaIndex implements Index {
 			MegaMap res = manager.createMegaMap(generateFilename(), path, true,
 					false);
 			for (MegaMap index : indexes) {
-				for (String s : (Set<String>) index.getKeys()) {
+				
+				/* Fixing names of files <-> docID */
+				@SuppressWarnings("unchecked")
+				Set<String> keys = (Set<String>) index.getKeys();
+				for (String s : keys) {
 					if (s.equals("..docIDs")) {
 						HashMap<String, String> m = (HashMap<String, String>) index
 								.get("..docIDs");
@@ -139,7 +143,8 @@ public class MegaIndex implements Index {
 						}
 						continue;
 					}
-				
+				/* End of fixing name */
+					
 					if (res.hasKey(s)) {
 						try {
 							PostingsList pl = (PostingsList) res.get(s);
