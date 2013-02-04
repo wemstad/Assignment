@@ -1,1 +1,0 @@
-#OMDIRIGERING [[GNU General Public License]]
