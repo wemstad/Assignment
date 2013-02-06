@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Extract local variable &apos;keys&apos; from expression &apos;(Set&lt;String&gt;)index.getKeys()&apos;&#x0A;- Original project: &apos;Lab&apos;&#x0A;- Variable name: &apos;keys&apos;&#x0A;- Destination method: &apos;ir.MegaIndex.merge()&apos;&#x0A;- Variable expression: &apos;(Set&lt;String&gt;)index.getKeys()&apos;&#x0A;- Replace occurrences of expression with variable" description="Extract local variable &apos;keys&apos;" final="false" id="org.eclipse.jdt.ui.extract.temp" input="/src&lt;ir{MegaIndex.java" name="keys" replace="true" selection="3608 29" stamp="1359464792495" version="1.0"/>
-</session>

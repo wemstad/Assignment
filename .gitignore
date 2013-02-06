@@ -1,3 +1,11 @@
 index/
 1000/
 2000/
+.metadata/
+.project
+.settings/
+.classpath
+*.class
+*.data
+*.index
+
