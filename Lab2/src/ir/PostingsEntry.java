@@ -62,7 +62,8 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 		offsets.add(index, offset);
 	}
 
-	public PostingsEntry clone() {
+	public Object clone() throws CloneNotSupportedException {
+		// super.clone();
 		@SuppressWarnings("unchecked")
 		ArrayList<Integer> clone = (ArrayList<Integer>) offsets.clone();
 		return new PostingsEntry(docID, clone, score);
